@@ -1,6 +1,5 @@
-package pb
 import com.github.nscala_time.time.Imports._
-import jline.{TerminalFactory}
+import jline.TerminalFactory
 
 /** Output type format, indicate which format wil be used in
  *  the speed box.
@@ -15,7 +14,7 @@ import Units._
  *  to mock the tty in the tests(i.e: override `print(...)`)
  */
 trait Output {
-  def print(s: String) = Console.print(s)
+  def print(s: String): Unit = Console.print(s)
 }
 
 object ProgressBar {
@@ -24,13 +23,13 @@ object ProgressBar {
   val LOG_INFO_MARGIN: Int = 7
 
   def kbFmt(n: Double): String = {
-    var kb = 1024
+    val kb = 1024
     n match {
-      case x if x >= Math.pow(kb, 4) => "%.2f TB".format(x / Math.pow(kb, 4))
-      case x if x >= Math.pow(kb, 3) => "%.2f GB".format(x / Math.pow(kb, 3))
-      case x if x >= Math.pow(kb, 2) => "%.2f MB".format(x / Math.pow(kb, 2))
-      case x if x >= kb => "%.2f KB".format(x / kb)
-      case _ => "%.0f B".format(n)
+      case x if x >= Math.pow(kb, 4) => f"${x / Math.pow(kb, 4)}%.2f TB"
+      case x if x >= Math.pow(kb, 3) => f"${x / Math.pow(kb, 3)}%.2f GB"
+      case x if x >= Math.pow(kb, 2) => f"${x / Math.pow(kb, 2)}%.2f MB"
+      case x if x >= kb => f"${x / kb}%.2f KB"
+      case _ => f"$n%.0f B"
     }
   }
 }
@@ -40,7 +39,7 @@ object ProgressBar {
  */
 class ProgressBar(val total: Int, margin: Int = ProgressBar.LOG_INFO_MARGIN) extends Output {
   var current = 0
-  private var startTime = DateTime.now
+  private val startTime = DateTime.now
   private var units = Units.Default
   private var barStart, barCurrent, barCurrentN, barRemain, barEnd = ""
   var isFinish = false
@@ -53,24 +52,23 @@ class ProgressBar(val total: Int, margin: Int = ProgressBar.LOG_INFO_MARGIN) ext
    *  @param          i the number to add to current value
    *  @return         current value
    */
-  def add(i: Int): Int = {
+  def add(i: Int): Unit = {
     current += i
     if (current <= total) draw()
-    current
   }
 
   /** Add value using += operator
    */
-  def +=(i: Int): Int = add(i)
+  def +=(i: Int): Unit = add(i)
 
   /** Set Units size
    *  the default is simple numbers, but you can use Bytes type instead.
    */
-  def setUnits(u: Units) = units = u
+  def setUnits(u: Units): Unit = units = u
 
   /** Set custom format to the drawing bar, default is `[=>-]`
    */
-  def format(fmt: String) {
+  def format(fmt: String): Unit = {
     if (fmt.length >= 5) {
       val v = fmt.split("").toList
       barStart = v(0)
@@ -81,21 +79,21 @@ class ProgressBar(val total: Int, margin: Int = ProgressBar.LOG_INFO_MARGIN) ext
     }
   }
 
-  private def draw() {
-    val width = TerminalFactory.get().getWidth() - margin
+  private def draw(): Unit = {
+    val width = TerminalFactory.get().getWidth - margin
     var prefix, base, suffix = ""
     // percent box
     if (showPercent) {
-      var percent = current.toFloat / (total.toFloat / 100)
-      suffix += " %.2f %% ".format(percent)
+      val percent = current.toFloat / (total.toFloat / 100)
+      suffix += f" $percent%.2f %% "
     }
     // speed box
     if (showSpeed) {
       val fromStart = (startTime to DateTime.now).millis.toFloat
       val speed = current / (fromStart / 1.seconds.millis)
       suffix += (units match {
-        case Default => "%.0f/s ".format(speed)
-        case Bytes => "%s/s ".format(ProgressBar.kbFmt(speed))
+        case Default => f"$speed%.0f/s "
+        case Bytes => s"${ProgressBar.kbFmt(speed)}/s "
       })
     }
     // time left box
@@ -104,15 +102,15 @@ class ProgressBar(val total: Int, margin: Int = ProgressBar.LOG_INFO_MARGIN) ext
       val left = (fromStart / current) * (total - current)
       val dur = Duration.millis(Math.ceil(left).toLong)
       if (dur.seconds > 0) {
-        if (dur.seconds < 1.minutes.seconds) suffix += f"eta ${dur.seconds}%ds"
-        else suffix += "%dm".format(dur.minutes)
+        if (dur.seconds < 1.minutes.seconds) suffix += s"eta ${dur.seconds}s"
+        else suffix += s"eta ${dur.minutes}m"
       }
     }
     // counter box
     if (showCounter) {
       prefix += (units match {
-        case Default => "%d / %d ".format(current, total)
-        case Bytes => "%s / %s ".format(ProgressBar.kbFmt(current), ProgressBar.kbFmt(total))
+        case Default => s"$current / $total "
+        case Bytes => s"${ProgressBar.kbFmt(current)} / ${ProgressBar.kbFmt(total)} "
       })
     }
     // bar box
@@ -142,7 +140,7 @@ class ProgressBar(val total: Int, margin: Int = ProgressBar.LOG_INFO_MARGIN) ext
   /** Calling finish manually will set current to total and draw
    *  the last time
    */
-  def finish() {
+  def finish(): Unit = {
     if (current < total) add(total - current)
     println()
     isFinish = true
