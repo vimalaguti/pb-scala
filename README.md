@@ -20,7 +20,7 @@ and set to your project `.dependsOn(scalaProgressBar)`
 object Main {
   def main(args: Array[String]) {
     var count = 1000
-    var pb = new ProgressBar(count)
+    var pb = new pb.ProgressBar(count)
     pb.showSpeed = false
     for (_ <- 1 to count) {
       pb += 1

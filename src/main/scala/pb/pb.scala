@@ -1,26 +1,29 @@
+package pb
+
 import com.github.nscala_time.time.Imports._
 import jline.TerminalFactory
+import pb.Units.{Bytes, Default, Units}
 
-/** Output type format, indicate which format wil be used in
- *  the speed box.
- */
+/** pb.Output type format, indicate which format wil be used in
+  * the speed box.
+  */
 object Units extends Enumeration {
   type Units = Value
   val Default, Bytes = Value
 }
-import Units._
 
-/** We're using Output as a trait of ProgressBar, so be able
- *  to mock the tty in the tests(i.e: override `print(...)`)
- */
+/** We're using pb.Output as a trait of pb.ProgressBar, so be able
+  * to mock the tty in the tests(i.e: override `print(...)`)
+  */
 trait Output {
   def print(s: String): Unit = Console.print(s)
 }
 
 object ProgressBar {
   private val Format = "[=>-]"
-  
+
   val LOG_INFO_MARGIN: Int = 7
+  val LOG_DEBUG_MARGIN: Int = 8
 
   def kbFmt(n: Double): String = {
     val kb = 1024
@@ -34,40 +37,41 @@ object ProgressBar {
   }
 }
 
-/** By calling new ProgressBar with Int as a total, you'll
- *  create a new ProgressBar with default configuration.
- */
-class ProgressBar(val total: Int, margin: Int = ProgressBar.LOG_INFO_MARGIN) extends Output {
-  var current = 0
+/** By calling new pb.ProgressBar with Int as a total, you'll
+  * create a new pb.ProgressBar with default configuration.
+  */
+class ProgressBar(val total: Int, margin: Int = 0) extends Output {
+  private[pb] var current = 0
   private val startTime = DateTime.now
   private var units = Units.Default
   private var barStart, barCurrent, barCurrentN, barRemain, barEnd = ""
-  var isFinish = false
+  private[pb] var isFinish = false
+
   var showBar, showSpeed, showPercent, showCounter, showTimeLeft = true
 
   format(ProgressBar.Format)
-  
+
   /** Add to current value
-   *  
-   *  @param          i the number to add to current value
-   *  @return         current value
-   */
+    *
+    * @param          i the number to add to current value
+    * @return current value
+    */
   def add(i: Int): Unit = {
     current += i
     if (current <= total) draw()
   }
 
   /** Add value using += operator
-   */
+    */
   def +=(i: Int): Unit = add(i)
 
-  /** Set Units size
-   *  the default is simple numbers, but you can use Bytes type instead.
-   */
+  /** Set pb.Units size
+    * the default is simple numbers, but you can use Bytes type instead.
+    */
   def setUnits(u: Units): Unit = units = u
 
   /** Set custom format to the drawing bar, default is `[=>-]`
-   */
+    */
   def format(fmt: String): Unit = {
     if (fmt.length >= 5) {
       val v = fmt.split("").toList
@@ -129,17 +133,16 @@ class ProgressBar(val total: Int, margin: Int = ProgressBar.LOG_INFO_MARGIN) ext
       }
     }
     // out
-    var out = prefix + base + suffix
-    if (out.length < width) {
-      out += " " * (width - out.length)
-    }
+    val out = prefix + base + suffix
+    val spaces: String = String.copyValueOf(Array.fill(width - out.length)(' '))
+
     // print
-    print("\r" + out)
+    print("\r" + out + spaces)
   }
 
   /** Calling finish manually will set current to total and draw
-   *  the last time
-   */
+    * the last time
+    */
   def finish(): Unit = {
     if (current < total) add(total - current)
     println()

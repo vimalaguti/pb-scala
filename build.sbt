@@ -1,5 +1,5 @@
 name := "pb"
-ThisBuild / version := "0.2.1"
+ThisBuild / version := "0.2.2"
 ThisBuild / scalaVersion := "2.11.12"
 
 crossScalaVersions := Seq("2.11.12", "2.12.7")
@@ -11,17 +11,17 @@ libraryDependencies ++= Seq(
 )
 
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
-homepage := Some(url("http://github.com/a8m/pb-scala"))
+homepage := Some(url("https://github.com/vimalaguti/pb-scala"))
 
-publishMavenStyle := true
-publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value)
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-}
-pomExtra := (
+//publishMavenStyle := true
+//publishTo := {
+//  val nexus = "https://oss.sonatype.org/"
+//  if (isSnapshot.value)
+//    Some("snapshots" at nexus + "content/repositories/snapshots")
+//  else
+//    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+//}
+pomExtra := 
   <scm>
     <url>git@github.com:a8m/pb-scala.git</url>
     <connection>scm:git:git@github.com:a8m/pb-scala.git</connection>
@@ -32,5 +32,9 @@ pomExtra := (
       <name>Ariel Mashraki</name>
       <url>http://github.com/a8m/</url>
     </developer>
+    <developer>
+      <id>vimalaguti</id>
+      <name>Vittorio Malaguti</name>
+      <url>http://github.com/vimalaguti/</url>
+    </developer>
   </developers>
-)
