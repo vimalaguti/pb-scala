@@ -17,7 +17,8 @@ class ProgressBarTest extends WordSpec with Matchers {
         pb.current should be (10)
         pb.messages.last should (
           startWith ("\r10 / 100") and
-          endWith regex "10.00 % (\\d+)/s (\\d+s *)*".r)
+          endWith regex "10.00 % (\\d+)/s *(\\d+s *)*".r
+        )
       }
     }
     "Using += operator" should {

@@ -20,6 +20,8 @@ trait Output {
 
 object ProgressBar {
   private val Format = "[=>-]"
+  
+  val LOG_INFO_MARGIN: Int = 7
 
   def kbFmt(n: Double): String = {
     var kb = 1024
@@ -36,8 +38,7 @@ object ProgressBar {
 /** By calling new ProgressBar with Int as a total, you'll
  *  create a new ProgressBar with default configuration.
  */
-class ProgressBar(_total: Int) extends Output {
-  val total = _total
+class ProgressBar(val total: Int, margin: Int = ProgressBar.LOG_INFO_MARGIN) extends Output {
   var current = 0
   private var startTime = DateTime.now
   private var units = Units.Default
@@ -81,7 +82,7 @@ class ProgressBar(_total: Int) extends Output {
   }
 
   private def draw() {
-    val width = TerminalFactory.get().getWidth()
+    val width = TerminalFactory.get().getWidth() - margin
     var prefix, base, suffix = ""
     // percent box
     if (showPercent) {
@@ -103,7 +104,7 @@ class ProgressBar(_total: Int) extends Output {
       val left = (fromStart / current) * (total - current)
       val dur = Duration.millis(Math.ceil(left).toLong)
       if (dur.seconds > 0) {
-        if (dur.seconds < 1.minutes.seconds) suffix += "%ds".format(dur.seconds)
+        if (dur.seconds < 1.minutes.seconds) suffix += f"eta ${dur.seconds}%ds"
         else suffix += "%dm".format(dur.minutes)
       }
     }
