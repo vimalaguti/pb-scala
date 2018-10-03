@@ -135,9 +135,10 @@ class ProgressBar(val total: Int, margin: Int = 0) extends Output {
     // out
     val out = prefix + base + suffix
     val spaces: String = String.copyValueOf(Array.fill(width - out.length)(' '))
+    val newLine: Char = if (current >= total) '\n' else ' '
 
     // print
-    print("\r" + out + spaces)
+    print("\r" + out + spaces + newLine)
   }
 
   /** Calling finish manually will set current to total and draw
