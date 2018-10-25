@@ -4,10 +4,11 @@ ThisBuild / description := "A progress bar for scala"
 ThisBuild / licenses := List("MIT" -> new URL("http://opensource.org/licenses/MIT"))
 ThisBuild / homepage := Some(url("https://github.com/vimalaguti/pb-scala"))
 
-lazy val pbar = (project in file("."))
-  .settings(
-    name := "pb"
-  )
+//lazy val pbar = (project in file("."))
+//  .settings(
+//    
+//  )
+name := "pb"
 
 crossScalaVersions := Seq("2.11.12", "2.12.7")
 
